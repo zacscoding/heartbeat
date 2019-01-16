@@ -7,7 +7,7 @@
     <groupId>com.zaccoding</groupId>
     <artifactId>heartbeat</artifactId>
     <packaging>pom</packaging>
-    <version>1.0.0</version>
+    <version>0.0.1</version>
 
     <modules>
         <module>heartbeat-agent</module>

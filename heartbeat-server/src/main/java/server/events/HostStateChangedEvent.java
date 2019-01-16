@@ -1,4 +1,4 @@
-package server.agent;
+package server.events;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,26 +7,23 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import server.state.HostEntity;
+import server.state.HostState;
 
 /**
  * @author zacconding
- * @Date 2019-01-15
+ * @Date 2019-01-16
  * @GitHub : https://github.com/zacscoding
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@EqualsAndHashCode(of = "serviceName")
-@ToString
 @Builder
-public class Heartbeat {
+@ToString
+@EqualsAndHashCode(of = "hostEntity")
+public class HostStateChangedEvent {
 
-    private String serviceName;
-    private String clientId;
-    private String userAgent;
-    private int pid;
-    private long beatInterval;
-    private long timestamp;
-    private String ip;
+    private HostState prevState;
+    private HostEntity hostEntity;
 }

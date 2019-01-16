@@ -2,6 +2,8 @@ package agent.heartbeat;
 
 import agent.AgentLogger;
 import agent.AgentProperties;
+import agent.heartbeat.predicate.AlivePredicate;
+import agent.heartbeat.predicate.TrueAlivePredicate;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.UUID;
@@ -24,12 +26,19 @@ public class HeartbeatClient implements Runnable {
 
     private ScheduledExecutorService scheduledExecutor;
     private String clientId;
+    private AlivePredicate alivePredicate;
+    private long failCount = 0L;
 
     public HeartbeatClient() {
+        this(TrueAlivePredicate.getInstance());
+    }
+
+    public HeartbeatClient(AlivePredicate alivePredicate) {
         this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor(
             new HeartbeatThreadFactory("HeartbeatThread", true)
         );
         this.clientId = UUID.randomUUID().toString();
+        this.alivePredicate = alivePredicate;
     }
 
     /**
@@ -62,6 +71,10 @@ public class HeartbeatClient implements Runnable {
             return;
         }
 
+        if (!alivePredicate.test()) {
+            return;
+        }
+
         final String queryString = getQueryString();
         for (String serverUrl : AgentProperties.INSTANCE.getServerUrls()) {
             // build heartbeat server url with query string
@@ -85,7 +98,11 @@ public class HeartbeatClient implements Runnable {
                 throw new Exception("Received response code : " + responseCode);
             }
         } catch (Exception e) {
-            AgentLogger.error(String.format("Failed to send heartbeat. %s. reason : %s", url, e.getMessage()));
+            failCount += 1L;
+
+            if (failCount % 100 == 0) {
+                AgentLogger.error(String.format("Failed to send heartbeat. %s. reason : %s", url, e.getMessage()));
+            }
         }
     }
 

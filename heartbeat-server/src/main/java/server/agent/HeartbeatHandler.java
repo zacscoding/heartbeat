@@ -1,8 +1,16 @@
 package server.agent;
 
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import server.events.HostStateChangedEvent;
+import server.events.publisher.HostStatePublisher;
+import server.state.HostEntity;
+import server.state.HostState;
+import server.state.repository.HostEntityRepository;
 
 /**
  * @author zacconding
@@ -13,7 +21,20 @@ import org.springframework.stereotype.Component;
 @Component
 public class HeartbeatHandler {
 
+    private HostEntityRepository hostEntityRepository;
     private HeartbeatMonitor heartbeatMonitor;
+    private HostStatePublisher hostStatePublisher;
+
+    @Autowired
+    public HeartbeatHandler(HostEntityRepository hostEntityRepository, HostStatePublisher hostStatePublisher) {
+        this.hostEntityRepository = hostEntityRepository;
+        this.hostStatePublisher = hostStatePublisher;
+        /*this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository,
+            hostStatePublisher, TimeUnit.MILLISECONDS.convert(1L, TimeUnit.MINUTES));*/
+
+        this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository,
+            hostStatePublisher, 6000L);
+    }
 
     @PostConstruct
     private void setUp() {
@@ -21,13 +42,57 @@ public class HeartbeatHandler {
     }
 
     /**
-     * Handle heart beat
+     * Handle heartbeat
      */
     public void handleHeartBeat(Heartbeat heartbeat) {
-        // depends on state change, publish event & will consume
-        // 1) Get host from this heartbeat
-        // 2-1) Not exist > save
-        // 2-2) Exist
-        // 2-2-1) HEARTBEAT_LOST or not
+        long now = System.currentTimeMillis();
+
+        Optional<HostEntity> hostOptional = hostEntityRepository.findByServiceName(heartbeat.getServiceName());
+        // register host & publish host started event
+        if (!hostOptional.isPresent()) {
+            log.debug("Register service : {}", heartbeat.getServiceName());
+            // save host
+            HostEntity hostEntity = convertHeartbeatToHost(heartbeat, now);
+            HostEntity saved = hostEntityRepository.save(hostEntity);
+
+            // publish new service
+            HostStateChangedEvent event = HostStateChangedEvent.builder()
+                .prevState(HostState.UNKNOWN)
+                .hostEntity(saved)
+                .build();
+            hostStatePublisher.publish(event);
+            return;
+        }
+
+        // update host
+        HostEntity host = hostOptional.get();
+        HostState prevState = host.getHostState();
+        host.setLastAgentTimestamp(now);
+        host.setLastUpdatedTimestamp(now);
+        host.setHostState(HostState.HEALTHY);
+        HostEntity updated = hostEntityRepository.save(host);
+
+        // publish HEARTBEAT_LOST -> HEALTHY event
+        if (prevState == HostState.HEARTBEAT_LOST) {
+            log.debug("Restarted {}", heartbeat.getServiceName());
+            HostStateChangedEvent event = HostStateChangedEvent.builder()
+                .prevState(prevState)
+                .hostEntity(updated)
+                .build();
+
+            hostStatePublisher.publish(event);
+        }
+    }
+
+    private HostEntity convertHeartbeatToHost(Heartbeat heartbeat, long now) {
+        return HostEntity.builder()
+            .serviceName(heartbeat.getServiceName())
+            .ip(heartbeat.getIp())
+            .pid(heartbeat.getPid())
+            .registerTimestamp(now)
+            .lastAgentTimestamp(now)
+            .lastUpdatedTimestamp(now)
+            .hostState(HostState.HEALTHY)
+            .build();
     }
 }

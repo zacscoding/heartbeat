@@ -37,6 +37,10 @@ public class AgentProperties {
         return pid;
     }
 
+    public void setPid(int pid) {
+        this.pid = pid;
+    }
+
     public String getServiceName() {
         return serviceName;
     }

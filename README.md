@@ -33,5 +33,6 @@ monitoring heartbeat & alert to slack
 ### TODO  
 
 - [x] agent impl
-- [ ] server impl
+- [ ] agent process heartbeat
+- [x] server impl
 - [ ] adds slack or others
