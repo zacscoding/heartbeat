@@ -87,6 +87,7 @@ public class HeartbeatMonitor implements Runnable {
                 HostState prevState = host.getHostState();
                 host.setHostState(HostState.HEARTBEAT_LOST);
                 host.setLastUpdatedTimestamp(now);
+                host.setPid(0);
                 HostEntity updated = hostEntityRepository.save(host);
 
                 // publish lost event

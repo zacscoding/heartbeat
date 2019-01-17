@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 
 /**
+ * HeartbeatAgent premain & main class
+ *
  * @author zacconding
  * @Date 2019-01-15
  * @GitHub : https://github.com/zacscoding
@@ -38,7 +40,7 @@ public class HeartbeatAgent {
 
     /**
      * Independent runner
-     * e.g) java -jar heartbeat-agent.jar
+     * e.g) java -jar heartbeat-agent.jar &
      */
     public static void main(String[] args) throws InterruptedException {
         AgentLogger.info("Started from HeartbeatAgentMain. args : " + Arrays.toString(args));

@@ -9,3 +9,5 @@ dependency-reduced-pom.xml
 *.iml
 .DS_Store
 db
+
+secret.yaml

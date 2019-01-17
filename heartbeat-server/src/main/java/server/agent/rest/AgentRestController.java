@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import server.agent.Heartbeat;
 import server.agent.HeartbeatHandler;
-import server.state.HostEntity;
-import server.state.repository.HostEntityRepository;
 import server.util.ServletHelper;
 
 /**
@@ -22,12 +20,10 @@ import server.util.ServletHelper;
 public class AgentRestController {
 
     private HeartbeatHandler heartbeatHandler;
-    private HostEntityRepository hostEntityRepository;
 
     @Autowired
-    public AgentRestController(HeartbeatHandler heartbeatHandler, HostEntityRepository hostEntityRepository) {
+    public AgentRestController(HeartbeatHandler heartbeatHandler) {
         this.heartbeatHandler = heartbeatHandler;
-        this.hostEntityRepository = hostEntityRepository;
     }
 
     /**

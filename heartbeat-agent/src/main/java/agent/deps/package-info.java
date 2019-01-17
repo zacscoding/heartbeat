@@ -1,4 +1,4 @@
 /**
- * Will moved jar dependencies after build at here
+ * Moved jar dependencies after build
  */
 package agent.deps;

@@ -10,7 +10,7 @@ public class ThreadUtil {
     /**
      * Return stack tract with cursor
      *
-     * Support having N stack trace array, where 0 is first call and N is prev invoker
+     * Support stack trace array with length N, where 0 is first call and N is prev invoker
      *
      * 1) cursor == 0
      * => return all

@@ -6,6 +6,7 @@ import agent.heartbeat.predicate.AlivePredicate;
 import agent.heartbeat.predicate.TrueAlivePredicate;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -67,6 +68,7 @@ public class HeartbeatClient implements Runnable {
 
     @Override
     public void run() {
+        System.out.println("## Check client :: " + this);
         if (!AgentProperties.INSTANCE.hasServerUrls()) {
             return;
         }

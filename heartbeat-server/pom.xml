@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <!--<parent>
         <artifactId>heartbeat</artifactId>
         <groupId>com.zaccoding</groupId>
@@ -34,7 +34,6 @@
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -47,11 +46,23 @@
             <optional>true</optional>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.6</version>
+        </dependency>
+
         <!-- guava -->
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>27.0-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>me.ramswaroop.jbot</groupId>
+            <artifactId>jbot</artifactId>
+            <version>4.1.0</version>
         </dependency>
 
         <dependency>
@@ -63,6 +74,7 @@
 
 
     <build>
+        <finalName>heartbeat-server-${project.version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

@@ -2,7 +2,6 @@ package server.events.listener;
 
 import static server.state.HostState.*;
 
-import com.google.common.eventbus.AllowConcurrentEvents;
 import com.google.common.eventbus.Subscribe;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -14,22 +13,23 @@ import server.state.HostEntity;
 import server.state.HostState;
 
 /**
+ * For dev
+ *
  * @author zacconding
  * @Date 2019-01-16
  * @GitHub : https://github.com/zacscoding
  */
 @Slf4j
 @Component
-public class HostStateListener {
+public class HostStateConsoleOutputListener {
 
     @Autowired
-    public HostStateListener(HostStatePublisher publisher) {
+    public HostStateConsoleOutputListener(HostStatePublisher publisher) {
         Objects.requireNonNull(publisher, "publisher must be not null");
         publisher.register(this);
     }
 
     @Subscribe
-    @AllowConcurrentEvents
     public void onHostStateChanged(HostStateChangedEvent event) {
         log.info("## Receive host state changed... " + event);
         HostState prevState = event.getPrevState();
@@ -38,32 +38,20 @@ public class HostStateListener {
         switch (prevState) {
             case UNKNOWN:
                 if (hostEntity.getHostState() == HEALTHY) {
-                    generateRegisterServiceMessage(hostEntity);
+                    log.info("## new service ... {}\t{}", hostEntity.getServiceName(), hostEntity);
                 }
                 break;
             case HEALTHY:
                 if (hostEntity.getHostState() == HEARTBEAT_LOST) {
-                    generateStoppedServiceMessage(hostEntity);
+                    log.info("## stopped  ... {}\t{}", hostEntity.getServiceName(), hostEntity);
                 }
 
                 break;
             case HEARTBEAT_LOST:
                 if (hostEntity.getHostState() == HEALTHY) {
-                    generateStartedServiceMessage(hostEntity);
+                    log.info("## restarted ... {}\t{}", hostEntity.getServiceName(), hostEntity);
                 }
                 break;
         }
-    }
-
-    private void generateRegisterServiceMessage(HostEntity hostEntity) {
-        log.info("## new service ... {}\t{}", hostEntity.getServiceName(), hostEntity);
-    }
-
-    private void generateStartedServiceMessage(HostEntity hostEntity) {
-        log.info("## restarted ... {}\t{}", hostEntity.getServiceName(), hostEntity);
-    }
-
-    private void generateStoppedServiceMessage(HostEntity hostEntity) {
-        log.info("## stopped  ... {}\t{}", hostEntity.getServiceName(), hostEntity);
     }
 }

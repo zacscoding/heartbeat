@@ -18,6 +18,14 @@ spring:
     hibernate:
       ddl-auto: update
 
+## Slack apis
+slack:
+  enabled: true
+  web-hook-url: <paste ur webhook url>
+  bot-token: <paste ur bot token>
+slackApi: https://slack.com/api
+
+
 ## logging
 logging:
   level:
