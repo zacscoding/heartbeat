@@ -11,8 +11,10 @@ import me.ramswaroop.jbot.core.common.JBot;
 import me.ramswaroop.jbot.core.slack.Bot;
 import me.ramswaroop.jbot.core.slack.models.Event;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
+import server.configuration.SlackConfiguration;
 import server.configuration.properties.SlackProperties;
 import server.state.HostEntity;
 import server.state.repository.HostEntityRepository;
@@ -29,6 +31,7 @@ import server.state.repository.HostEntityRepository;
 @Slf4j
 @JBot
 @Component
+@ConditionalOnBean(SlackConfiguration.class)
 public class SlackBot extends Bot {
 
     private String helpMessage;

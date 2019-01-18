@@ -34,13 +34,11 @@
             <artifactId>javassist</artifactId>
             <version>${javassist.version}</version>
         </dependency>
-
-        <!-- lombok -->
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
-            <scope>provided</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.9.8</version>
         </dependency>
     </dependencies>
 
@@ -87,6 +85,10 @@
                                 <relocation>
                                     <pattern>org</pattern>
                                     <shadedPattern>agent.deps.org</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>com</pattern>
+                                    <shadedPattern>agent.deps.com</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javassist</pattern>
