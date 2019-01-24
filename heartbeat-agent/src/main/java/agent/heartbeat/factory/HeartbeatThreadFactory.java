@@ -1,4 +1,4 @@
-package agent.heartbeat;
+package agent.heartbeat.factory;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -7,8 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Heartbeat thread factory
  *
- * @author zacconding
- * @Date 2019-01-15
  * @GitHub : https://github.com/zacscoding
  */
 public class HeartbeatThreadFactory implements ThreadFactory {

@@ -2,50 +2,57 @@ package agent.heartbeat;
 
 import agent.AgentLogger;
 import agent.AgentProperties;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.UUID;
+import agent.heartbeat.factory.HeartbeatThreadFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 /**
  * Heartbeat client
  *
- * @author zacconding
- * @Date 2019-01-15
  * @GitHub : https://github.com/zacscoding
  */
 public class HeartbeatClient implements Runnable {
 
-    private static final int READ_TIMEOUT = 3000;
-    private static final int CONNECT_TIMEOUT = 3000;
-    private static final String USER_AGENT = "Heartbeat";
+    private static final long READ_TIMEOUT = 3000L;
+    private static final long CONNECT_TIMEOUT = 3000L;
 
     private ScheduledExecutorService scheduledExecutor;
-    private String clientId;
-    private long failCount = 0L;
+    private List<Heartbeat> heartbeats;
+    private OkHttpClient httpClient;
 
-    public HeartbeatClient() {
+
+    public HeartbeatClient(Heartbeat heartbeat) {
+        this(Arrays.asList(heartbeat));
+    }
+
+    public HeartbeatClient(List<Heartbeat> heartbeats) {
+        this.heartbeats = heartbeats;
         this.scheduledExecutor = Executors.newSingleThreadScheduledExecutor(
             new HeartbeatThreadFactory("HeartbeatThread", true)
         );
-        this.clientId = UUID.randomUUID().toString();
+        this.httpClient = new OkHttpClient().newBuilder()
+            .readTimeout(READ_TIMEOUT, TimeUnit.MILLISECONDS)
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.MILLISECONDS)
+            .build();
     }
 
-    /**
-     * Start heartbeat scheduler
-     */
     public void start() {
         scheduledExecutor.scheduleAtFixedRate(
-            this, AgentProperties.INSTANCE.getInitDelay(),
-            AgentProperties.INSTANCE.getPeriod(), TimeUnit.MILLISECONDS
+            this, AgentProperties.INSTANCE.getHeartbeatInitDelay(),
+            AgentProperties.INSTANCE.getHeartbeatPeriod(), TimeUnit.MILLISECONDS
         );
     }
 
-    /**
-     * Stop heartbeat scheduler
-     */
     public void stop() {
         scheduledExecutor.shutdown();
         try {
@@ -59,64 +66,67 @@ public class HeartbeatClient implements Runnable {
 
     @Override
     public void run() {
-        if (!AgentProperties.INSTANCE.hasServerUrls()) {
-            return;
-        }
-
-        final String queryString = getQueryString();
-        for (String serverUrl : AgentProperties.INSTANCE.getServerUrls()) {
-            // build heartbeat server url with query string
-            String url = new StringBuilder(serverUrl.length() + queryString.length() + 1)
-                .append(serverUrl).append('?').append(queryString).toString();
-
-            doBeat(url);
-        }
-    }
-
-    /**
-     * Try to beat to url
-     */
-    private void doBeat(String url) {
         try {
-            HttpURLConnection connection = createConnection(url);
-            int responseCode = connection.getResponseCode();
-            connection.disconnect();
+            if (!AgentProperties.INSTANCE.hasServerUrls()) {
+                return;
+            }
 
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new Exception("Received response code : " + responseCode);
+            List<Heartbeat> aliveHearts = new ArrayList<Heartbeat>(heartbeats.size());
+            List<Heartbeat> deadHeartbeat = new ArrayList<Heartbeat>(heartbeats.size());
+
+            for (Heartbeat heartbeat : heartbeats) {
+                if (heartbeat.isAlive()) {
+                    aliveHearts.add(heartbeat);
+                } else {
+                    deadHeartbeat.add(heartbeat);
+                }
+            }
+
+            if (!aliveHearts.isEmpty()) {
+                for (String serverUrl : AgentProperties.INSTANCE.getServerUrls()) {
+                    for (Heartbeat heartbeat : aliveHearts) {
+                        try {
+                            doBeat(serverUrl, heartbeat);
+                        } finally {
+                            heartbeat.resetState();
+                        }
+                    }
+                }
+            }
+
+            if (!deadHeartbeat.isEmpty()) {
+                for (Heartbeat heartbeat : deadHeartbeat) {
+                    heartbeat.resetState();
+                }
             }
         } catch (Exception e) {
-            failCount += 1L;
-
-            if (failCount % 100 == 0) {
-                AgentLogger.error(String.format("Failed to send heartbeat. %s. reason : %s", url, e.getMessage()));
-            }
         }
     }
 
-    /**
-     * Getting query string from AgentProperties like below
-     *
-     * "serviceName=DefaultService&pid=870&clientId=UUID_VALUE"
-     */
-    private String getQueryString() {
-        return new StringBuilder()
-            .append("serviceName=").append(AgentProperties.INSTANCE.getServiceName())
-            .append("&pid=").append(AgentProperties.INSTANCE.getPid())
-            .append("&clientId=").append(clientId)
-            .toString();
-    }
+    private void doBeat(String serverUrl, Heartbeat heartbeat) {
+        try {
+            RequestBody body = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"), heartbeat.getJsonDate()
+            );
 
-    private HttpURLConnection createConnection(String url) throws Exception {
-        URL heartbeatUrl = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) heartbeatUrl.openConnection();
+            Request request = new Request.Builder()
+                .header("user-agent", heartbeat.getUserAgent())
+                .url(serverUrl)
+                .post(body)
+                .build();
+            Call call = httpClient.newCall(request);
+            Response response = call.execute();
 
-        connection.setConnectTimeout(CONNECT_TIMEOUT);
-        connection.setReadTimeout(READ_TIMEOUT);
-        connection.setRequestMethod("GET");
-        connection.setRequestProperty("User-Agent", USER_AGENT);
-        connection.addRequestProperty("beat-interval", Long.toString(AgentProperties.INSTANCE.getPeriod()));
-
-        return connection;
+            if (response.code() != 200) {
+                throw new Exception("Invalid status code : " + response.code());
+            }
+        } catch (Exception e) {
+            heartbeat.incrementFailedCount();
+            if (heartbeat.getFailedCount() % 100 == 0) {
+                AgentLogger.error(
+                    String.format("Failed to do beat. url : %s / reason : %s", serverUrl, e.getMessage())
+                );
+            }
+        }
     }
 }

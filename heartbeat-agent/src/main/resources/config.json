@@ -1,0 +1,16 @@
+{
+  "serverUrls": [
+    "http://localhost:8080/heartbeat"
+  ],
+  "heartbeatInitDelay": 500,
+  "heartbeatPeriod": 1000,
+  "services": [
+    {
+      "type": "docker",
+      "serviceName": "DemoAppService",
+      "processIdFile": "",
+      "processNames": "",
+      "dockerNames": "ndb"
+    }
+  ]
+}

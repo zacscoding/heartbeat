@@ -1,15 +1,16 @@
 package agent;
 
+import agent.AgentProperties.Service;
+import agent.heartbeat.Heartbeat;
 import agent.heartbeat.HeartbeatClient;
+import agent.heartbeat.HeartbeatServiceType;
+import agent.heartbeat.JavaAgentHeartbeat;
 import java.lang.instrument.Instrumentation;
-import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
+import java.util.List;
 
 /**
  * HeartbeatAgent premain & main class
  *
- * @author zacconding
- * @Date 2019-01-15
  * @GitHub : https://github.com/zacscoding
  */
 public class HeartbeatAgent {
@@ -31,8 +32,16 @@ public class HeartbeatAgent {
 
         try {
             HeartbeatAgent.instrumentation = inst;
-            new HeartbeatClient().start();
-            AgentLogger.info("Started heartbeat client");
+
+            List<Service> services = AgentProperties.INSTANCE.getServices();
+            if (services != null && services.size() == 1) {
+                Service service = services.get(0);
+                if (service.getType() == HeartbeatServiceType.AGENT) {
+                    Heartbeat heartbeat = new JavaAgentHeartbeat(service.getServiceName());
+                    new HeartbeatClient(heartbeat).start();
+                    AgentLogger.info("Started heartbeat client");
+                }
+            }
         } catch (Throwable t) {
             AgentLogger.error("Failed to premain in HeartbeatAgent", t);
         }
@@ -42,15 +51,12 @@ public class HeartbeatAgent {
      * Independent runner
      * e.g) java -jar heartbeat-agent.jar &
      */
-    public static void main(String[] args) throws InterruptedException {
-        AgentLogger.info("Started from HeartbeatAgentMain. args : " + Arrays.toString(args));
+    public static void main(String[] args) {
+        if (AgentProperties.INSTANCE.hasError()) {
+            AgentLogger.error("Terminate application because of parsing error");
+            return;
+        }
 
-        // TODO :: depends on args, will make AlivePredicate
-        // Change pid about process
-        AgentProperties.INSTANCE.setPid(0);
-        new HeartbeatClient().start();
-
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        countDownLatch.await();
+        new Bootstrap().start();
     }
 }

@@ -1,33 +1,22 @@
 package agent.heartbeat;
 
-import agent.heartbeat.predicate.AlivePredicate;
-import agent.heartbeat.predicate.TrueAlivePredicate;
 import java.lang.management.ManagementFactory;
 
 /**
- * Agent heartbeat
+ * java agent heartbeat
  *
- * TODO :: WORKING MULTIPLE HEARTBEAT
- *
- * @author zacconding
- * @Date 2019-01-17
  * @GitHub : https://github.com/zacscoding
  */
-public class AgentHeartbeat extends Heartbeat {
+public class JavaAgentHeartbeat extends Heartbeat {
 
     private Integer pid;
 
-    public AgentHeartbeat(String serviceName) {
+    public JavaAgentHeartbeat(String serviceName) {
         super(serviceName);
     }
 
     @Override
-    protected AlivePredicate getAlivePredicate() {
-        return TrueAlivePredicate.getInstance();
-    }
-
-    @Override
-    protected int getPid() {
+    public int getPid() {
         if (pid == null) {
             try {
                 String jvmName = ManagementFactory.getRuntimeMXBean().getName();
@@ -38,5 +27,16 @@ public class AgentHeartbeat extends Heartbeat {
         }
 
         return pid;
+    }
+
+    @Override
+    public boolean isAlive() {
+        // JavaAgentHeartbeat is always alive
+        return true;
+    }
+
+    @Override
+    public void resetState() {
+        // do nothing
     }
 }

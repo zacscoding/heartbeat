@@ -7,8 +7,6 @@ import java.util.Date;
 /**
  * Agent console output logger
  *
- * @author zacconding
- * @Date 2019-01-15
  * @GitHub : https://github.com/zacscoding
  */
 public class AgentLogger {
