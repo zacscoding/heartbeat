@@ -52,6 +52,8 @@ public class HeartbeatAgent {
      * e.g) java -jar heartbeat-agent.jar &
      */
     public static void main(String[] args) {
+        AgentLogger.info("Start heartbeat agent");
+
         if (AgentProperties.INSTANCE.hasError()) {
             AgentLogger.error("Terminate application because of parsing error");
             return;

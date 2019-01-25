@@ -58,7 +58,7 @@ public class Bootstrap {
         }
     }
 
-    public void setUpHeartbeatClient() {
+    private void setUpHeartbeatClient() {
         List<Service> services = AgentProperties.INSTANCE.getServices();
         if (services == null || services.size() == 0) {
             throw new RuntimeException("Service must be not empty");
@@ -85,6 +85,10 @@ public class Bootstrap {
             }
 
             heartbeats.add(heartbeat);
+        }
+
+        for (Heartbeat heartbeat : heartbeats) {
+            AgentLogger.info("Registered heartbeat service : " + heartbeat.getServiceName());
         }
 
         this.heartbeatClient = new HeartbeatClient(heartbeats);
