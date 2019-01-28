@@ -72,31 +72,26 @@ public class HeartbeatClient implements Runnable {
             }
 
             List<Heartbeat> aliveHearts = new ArrayList<Heartbeat>(heartbeats.size());
-            List<Heartbeat> deadHeartbeat = new ArrayList<Heartbeat>(heartbeats.size());
 
             for (Heartbeat heartbeat : heartbeats) {
                 if (heartbeat.isAlive()) {
                     aliveHearts.add(heartbeat);
                 } else {
-                    deadHeartbeat.add(heartbeat);
+                    heartbeat.resetState();
                 }
             }
 
             if (!aliveHearts.isEmpty()) {
-                for (String serverUrl : AgentProperties.INSTANCE.getServerUrls()) {
+                List<String> serverUrls = AgentProperties.INSTANCE.getServerUrls();
+                int size = serverUrls.size();
+
+                for (int i = 0; i < size; i++) {
                     for (Heartbeat heartbeat : aliveHearts) {
-                        try {
-                            doBeat(serverUrl, heartbeat);
-                        } finally {
+                        doBeat(serverUrls.get(i), heartbeat);
+                        if (i == size - 1) {
                             heartbeat.resetState();
                         }
                     }
-                }
-            }
-
-            if (!deadHeartbeat.isEmpty()) {
-                for (Heartbeat heartbeat : deadHeartbeat) {
-                    heartbeat.resetState();
                 }
             }
         } catch (Exception e) {
@@ -120,11 +115,14 @@ public class HeartbeatClient implements Runnable {
             if (response.code() != 200) {
                 throw new Exception("Invalid status code : " + response.code());
             }
+
+            heartbeat.resetFailedCount();
         } catch (Exception e) {
             heartbeat.incrementFailedCount();
             if (heartbeat.getFailedCount() % 100 == 0) {
                 AgentLogger.error(
-                    String.format("Failed to do beat. url : %s / reason : %s", serverUrl, e.getMessage())
+                    String.format("Failed to do beat (%d). url : %s / reason : %s",
+                        heartbeat.getFailedCount(), serverUrl, e.getMessage())
                 );
             }
         }

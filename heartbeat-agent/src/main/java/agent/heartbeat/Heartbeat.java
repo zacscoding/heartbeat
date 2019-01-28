@@ -71,4 +71,8 @@ public abstract class Heartbeat implements Recyclable {
     public void incrementFailedCount() {
         this.failedCount += 1L;
     }
+
+    public void resetFailedCount() {
+        this.failedCount = 0L;
+    }
 }

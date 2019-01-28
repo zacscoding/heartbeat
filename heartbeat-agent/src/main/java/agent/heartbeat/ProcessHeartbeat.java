@@ -139,7 +139,6 @@ public class ProcessHeartbeat extends Heartbeat {
                 while (lines.hasMoreTokens()) {
                     String line = lines.nextToken();
                     if (line.contains(processName)) {
-                        System.out.println("Find pid :: " + line);
                         String pidVal = line.trim().split("\\s+")[0];
                         return Integer.parseInt(pidVal);
                     }
