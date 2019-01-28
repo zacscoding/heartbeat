@@ -1,5 +1,6 @@
 package server.state.repository;
 
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import server.state.HostEntity;
@@ -12,4 +13,6 @@ import server.state.HostEntity;
 public interface HostEntityRepository extends JpaRepository<HostEntity, Long> {
 
     Optional<HostEntity> findByServiceName(String serviceName);
+
+    List<HostEntity> findByServiceNameContaining(String serviceName);
 }

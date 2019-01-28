@@ -1,5 +1,6 @@
 package agent.heartbeat;
 
+import agent.AgentLogger;
 import agent.process.DefaultProcessExecutor;
 import agent.process.ExecuteResult;
 import agent.process.ProcessExecutor;
@@ -72,6 +73,7 @@ public class ProcessHeartbeat extends Heartbeat {
 
     private void lookupWindowsProcess() {
         this.isAlive = false;
+        AgentLogger.error("Not supported window process yet");
     }
 
     private void lookupLinuxProcess() {

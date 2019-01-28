@@ -46,6 +46,7 @@ public class AgentController {
         heartbeat = extractHeartbeat(heartbeat);
         log.info("Receive heartbeat .. {}", heartbeat);
 
+        heartbeatHandler.handleHeartBeat(heartbeat);
         return ResponseEntity.ok().build();
     }
 

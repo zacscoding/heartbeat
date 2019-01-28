@@ -74,7 +74,8 @@
 
 
     <build>
-        <finalName>heartbeat-server-${project.version}</finalName>
+        <!--<finalName>heartbeat-server-${project.version}</finalName>-->
+        <finalName>heartbeat-server</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

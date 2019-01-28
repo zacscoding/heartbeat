@@ -31,8 +31,15 @@ public class HeartbeatHandler {
         /*this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository,
             hostStatePublisher, TimeUnit.MILLISECONDS.convert(1L, TimeUnit.MINUTES));*/
 
+        Long threadWakeUpInterval = null;
+        try {
+            threadWakeUpInterval = Long.parseLong(System.getenv("heartbeat.server.threadWakeUpInterval"));
+        } catch (Exception e) {
+            threadWakeUpInterval = Long.valueOf(60000L);
+        }
+
         this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository,
-            hostStatePublisher, 6000L);
+            hostStatePublisher, threadWakeUpInterval);
     }
 
     @PostConstruct
@@ -44,42 +51,46 @@ public class HeartbeatHandler {
      * Handle heartbeat
      */
     public void handleHeartBeat(Heartbeat heartbeat) {
-        long now = System.currentTimeMillis();
+        try {
+            long now = System.currentTimeMillis();
 
-        Optional<HostEntity> hostOptional = hostEntityRepository.findByServiceName(heartbeat.getServiceName());
-        // register host & publish host started event
-        if (!hostOptional.isPresent()) {
-            log.debug("Register service : {}", heartbeat.getServiceName());
-            // save host
-            HostEntity hostEntity = convertHeartbeatToHost(heartbeat, now);
-            HostEntity saved = hostEntityRepository.save(hostEntity);
+            Optional<HostEntity> hostOptional = hostEntityRepository.findByServiceName(heartbeat.getServiceName());
+            // register host & publish host started event
+            if (!hostOptional.isPresent()) {
+                log.info("Register service : {}", heartbeat.getServiceName());
+                // save host
+                HostEntity hostEntity = convertHeartbeatToHost(heartbeat, now);
+                HostEntity saved = hostEntityRepository.save(hostEntity);
 
-            // publish new service
-            HostStateChangedEvent event = HostStateChangedEvent.builder()
-                .prevState(HostState.UNKNOWN)
-                .hostEntity(saved)
-                .build();
-            hostStatePublisher.publish(event);
-            return;
-        }
+                // publish new service
+                HostStateChangedEvent event = HostStateChangedEvent.builder()
+                    .prevState(HostState.UNKNOWN)
+                    .hostEntity(saved)
+                    .build();
+                hostStatePublisher.publish(event);
+                return;
+            }
 
-        // update host
-        HostEntity host = hostOptional.get();
-        HostState prevState = host.getHostState();
-        host.setLastAgentTimestamp(now);
-        host.setLastUpdatedTimestamp(now);
-        host.setHostState(HostState.HEALTHY);
-        HostEntity updated = hostEntityRepository.save(host);
+            // update host
+            HostEntity host = hostOptional.get();
+            HostState prevState = host.getHostState();
+            host.setLastAgentTimestamp(now);
+            host.setLastUpdatedTimestamp(now);
+            host.setHostState(HostState.HEALTHY);
+            HostEntity updated = hostEntityRepository.save(host);
 
-        // publish HEARTBEAT_LOST -> HEALTHY event
-        if (prevState == HostState.HEARTBEAT_LOST) {
-            log.debug("Restarted {}", heartbeat.getServiceName());
-            HostStateChangedEvent event = HostStateChangedEvent.builder()
-                .prevState(prevState)
-                .hostEntity(updated)
-                .build();
+            // publish HEARTBEAT_LOST -> HEALTHY event
+            if (prevState == HostState.HEARTBEAT_LOST) {
+                log.info("Restarted {}", heartbeat.getServiceName());
+                HostStateChangedEvent event = HostStateChangedEvent.builder()
+                    .prevState(prevState)
+                    .hostEntity(updated)
+                    .build();
 
-            hostStatePublisher.publish(event);
+                hostStatePublisher.publish(event);
+            }
+        } catch (Exception e) {
+            log.error("Exception occur while handling heartbeat", e);
         }
     }
 

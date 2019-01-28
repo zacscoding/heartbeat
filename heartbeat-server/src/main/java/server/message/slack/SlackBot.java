@@ -118,15 +118,38 @@ public class SlackBot extends Bot {
             return;
         }
 
-        String serviceName = args[1];
+        String serviceName = args[1].trim();
 
-        Optional<HostEntity> hostEntityOptional = hostEntityRepository.findByServiceName(serviceName);
-        if (!hostEntityOptional.isPresent()) {
-            reply(session, event, "not found `" + serviceName + "`");
-            return;
+        boolean isLike = false;
+        // prefix
+        if (serviceName.length() > 1 && serviceName.charAt(0) == '%') {
+            isLike = true;
+            serviceName = serviceName.substring(1);
         }
 
-        replyServerStatesMessage(session, event, Arrays.asList(hostEntityOptional.get()));
+        // suffix
+        if (serviceName.length() > 1 && serviceName.charAt(serviceName.length() - 1) == '%') {
+            isLike = true;
+            serviceName = serviceName.substring(0, serviceName.length() - 1);
+        }
+
+        List<HostEntity> results = null;
+
+        if ("%".equals(serviceName)) {
+            results = hostEntityRepository.findAll();
+        } else if (isLike) {
+            results = hostEntityRepository.findByServiceNameContaining(serviceName);
+        } else {
+            Optional<HostEntity> hostEntityOptional = hostEntityRepository.findByServiceName(serviceName);
+            if (!hostEntityOptional.isPresent()) {
+                reply(session, event, "not found `" + serviceName + "`");
+                return;
+            }
+
+            results = Arrays.asList(hostEntityOptional.get());
+        }
+
+        replyServerStatesMessage(session, event, results);
     }
 
     /**
@@ -142,9 +165,9 @@ public class SlackBot extends Bot {
     private void replyServerStatesMessage(WebSocketSession session, Event event, List<HostEntity> hosts) {
         StringBuilder message = new StringBuilder();
 
-        message.append(messageConverter.getLineDelimiter())
+        message.append(messageConverter.getLineSeparator())
             .append(messageConverter.getHostStateTitle())
-            .append(messageConverter.getLineDelimiter());
+            .append(messageConverter.getLineSeparator());
 
         for (HostEntity hostEntity : hosts) {
             message.append(messageConverter.getHostStateString(hostEntity)).append("\n");

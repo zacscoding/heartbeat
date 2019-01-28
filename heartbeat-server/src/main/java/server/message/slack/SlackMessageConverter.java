@@ -2,7 +2,6 @@ package server.message.slack;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.StringTokenizer;
 import lombok.extern.slf4j.Slf4j;
 import me.ramswaroop.jbot.core.slack.models.Attachment;
 import me.ramswaroop.jbot.core.slack.models.RichMessage;
@@ -22,11 +21,11 @@ public class SlackMessageConverter {
 
     private SimpleDateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
     // ServiceName / Working / Pid / Ip / Last beat
-    private String displayFormat = "%-20s\t/ %-10s\t/ %-10s\t/ %-10s\t/ %-20s\n";
-    private String lineDelimiter = "----------------------------------------------------------------------------------------------\n";
+    private String displayFormat = "%-20s    / %-10s    / %-10s    / %-10s    / %-20s\n";
+    private String lineSeparator = "----------------------------------------------------------------------------------------------\n";
 
-    public String getLineDelimiter() {
-        return lineDelimiter;
+    public String getLineSeparator() {
+        return lineSeparator;
     }
 
     /**

@@ -11,3 +11,14 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace
+    server: debug
+    root: info

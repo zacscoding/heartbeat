@@ -2,6 +2,7 @@ package server.state.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.Before;
@@ -51,5 +52,21 @@ public class HostEntityRepositoryTest {
             Optional<HostEntity> optional = hostEntityRepository.findByServiceName("Service" + i);
             assertThat(optional.isPresent()).isFalse();
         }
+    }
+
+    @Test
+    public void findByServiceNameWithLike() {
+        IntStream.rangeClosed(1, 10).forEach(i -> {
+            final boolean dev = (i % 2 == 0);
+            final String serviceName = dev ? ("Service" + i + "[DEV]") : ("Service" + i);
+            hostEntityRepository.save(
+                HostEntity.builder()
+                    .serviceName(serviceName)
+                    .build()
+            );
+        });
+
+        List<HostEntity> results = hostEntityRepository.findByServiceNameContaining("[DEV]");
+        System.out.println(results.size());
     }
 }

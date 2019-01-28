@@ -18,6 +18,11 @@ spring:
     hibernate:
       ddl-auto: update
 
+## heartbeat
+heartbeat:
+  server:
+    threadWakeUpInterval: 60000
+
 ## Slack apis
 slack:
   enabled: true
@@ -25,8 +30,15 @@ slack:
   bot-token: <paste ur bot token>
 slackApi: https://slack.com/api
 
-
 ## logging
 logging:
   level:
+    org:
+      hibernate:
+        SQL: debug
+        type:
+          descriptor:
+            sql:
+              BasicBinder: trace
     server: debug
+    root: info

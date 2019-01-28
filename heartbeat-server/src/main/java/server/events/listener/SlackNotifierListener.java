@@ -47,6 +47,9 @@ public class SlackNotifierListener {
         HostState prevState = event.getPrevState();
         HostEntity hostEntity = event.getHostEntity();
 
+        log.debug("onHostStateChanged. prev : {} >> now : {}"
+            , event.getPrevState(), event.getHostEntity().getHostState());
+
         switch (prevState) {
             case UNKNOWN:
                 // register
@@ -73,7 +76,7 @@ public class SlackNotifierListener {
     private void sendHostStateChangedMessage(String changedState, HostEntity hostEntity) {
         StringBuilder builder = new StringBuilder();
         builder.append("[ ").append(changedState).append(" ]")
-            .append("\tService `").append(hostEntity.getServiceName()).append("`");
+            .append("    Service `").append(hostEntity.getServiceName()).append("`");
 
         slackWebHooks.invokeSlackWebHooks(
             messageConverter.convertHostStateChangedMessage(builder.toString())

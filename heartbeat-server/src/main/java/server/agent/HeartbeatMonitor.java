@@ -103,6 +103,6 @@ public class HeartbeatMonitor implements Runnable {
     }
 
     private boolean isLostHeartbeat(long lastHeartbeatTime, long now) {
-        return (lastHeartbeatTime + 2 * threadWakeupInterval) < now;
+        return (lastHeartbeatTime + (2 * threadWakeupInterval)) < now;
     }
 }
