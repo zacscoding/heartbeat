@@ -1,14 +1,19 @@
 # Heartbeat agent with server  
 
+check alive about [java process, normal process, docker container]  
 
 > ## Heartbeat agent  
 
-by using javaagent send heratbeat request  
+- check process or docker container by runnging java daemon
+- check process by using by using javaagent send heratbeat request  
 (will added process monitor)  
 
 > ## Heartbeat server  
 
-monitoring heartbeat & alert to slack  
+- monitoring heartbeat > alert state changed
+- support command in slack bot  
+
+<br /><br />
 
 ---  
 
@@ -17,6 +22,10 @@ monitoring heartbeat & alert to slack
 ![slack_webhooks](./pics/slack_webhooks.png)  
 
 ![slack_bot](./pics/slack_bot.png)  
+
+<br /><br />
+
+---  
 
 > ## Getting started  
 
@@ -28,15 +37,29 @@ $ mvn clean install
 
 > ### 2. Apply agent  
 
-**Agent properties**  
+- agent config json  
 
-- **javaagent** : java agent instrument
-- **Dheartbeat.service_name** : service name must be unique
-- **Dheartbeat.server_urls** : server urls where splitted ','
-- **Dheartbeat.init_delay** : (optional) heartbeat initial delay (default 5000)
-- **Dheartbeat.period** : (optional)  heartbeat period (default 5000)  
+```
+{
+  "serverUrls": [
+    "http://localhost:8080/heartbeat"
+  ],
+  "heartbeatInitDelay": 500,
+  "heartbeatPeriod": 1000,
+  "services": [
+    {
+      // "javaagent" | "process" | "docker"
+      "type": "javaagent",
+      "serviceName": "DemoAppService",
+      "processIdFile": "",
+      "processNames": "",
+      "dockerNames": "ndb"
+    }
+  ]
+}
+```
 
-**Agent apply**  
+> #### Start heartbeat agent in javaagent
 
 - **reference from elastic/apm-agent-java**  
 (https://www.elastic.co/guide/en/apm/agent/java/current/application-server-setup.html)
@@ -44,24 +67,36 @@ $ mvn clean install
 - **Normal use**  
 
 ```
-$ java -javaagent:/path/to/heartbeat-agent-<version>.jar -Dheartbeat.service_name=Service1 -Dheartbeat.server_urls=http://127.0.0.1:8080/heartbeat -jar demo.jar
+$ java -javaagent:/path/to/heartbeat-agent-<version>.jar -Dheartbeat.config.location=/path/config.json -jar yourapp.jar
 ```  
 
 - **Tomcat (bin/setenv.sh)**   
 
 ```
 export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/path/to/heartbeat-agent-<version>.jar"
-export CATALINA_OPTS="$CATALINA_OPTS -Dheartbeat.service_name=Service1"
-export CATALINA_OPTS="$CATALINA_OPTS -Dheartbeat.server_urls=http://127.0.0.1:8080/heartbeat"
+export CATALINA_OPTS="$CATALINA_OPTS -Dheartbeat.config.location=/path/config.json
 ```  
 
 - **Tomcat (bin/setenv.bat)**  
 
 ```
 set CATALINA_OPTS=%CATALINA_OPTS% -javaagent:/path/to/heartbeat-agent-<version>.jar
-set CATALINA_OPTS=%CATALINA_OPTS% -Dheartbeat.service_name=Service1
-set CATALINA_OPTS=%CATALINA_OPTS% -Dheartbeat.server_urls=http://127.0.0.1:8080/heartbeat
+set CATALINA_OPTS=%CATALINA_OPTS% -Dheartbeat.config.location=/path/config.json
 ```  
+
+> #### Start heartbeat agent with daemon  
+
+```
+$ java -Dheartbeat.config.location=/path/config.json -jar heartbeat-agent-0.0.1.jar  
+
+or
+
+$ use start.sh in resources/bin  
+```  
+
+<br /><br />  
+
+---  
 
 > ### 3. Running heartbeat server  
 
@@ -117,8 +152,8 @@ logging:
 ### TODO  
 
 - [x] agent impl
-- [ ] agent process heartbeat
-- [ ] support process heartbeat (1 client <-> n process)
+- [x] agent process heartbeat  
+- [x] support process heartbeat (1 client <-> n process)
 - [ ] agent config file manager
 - [x] server impl
 - [x] adds slack or others
