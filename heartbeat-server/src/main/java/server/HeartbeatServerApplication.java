@@ -19,14 +19,19 @@ public class HeartbeatServerApplication {
         SpringApplication.run(HeartbeatServerApplication.class, args);
     }
 
+    /**
+     * Override application.yaml to secret.yaml in IDE
+     */
     private static void beforeApplication() {
         try {
             ClassPathResource resource = new ClassPathResource("secret.yaml");
             if (resource.exists()) {
-                System.setProperty("spring.config.location", resource.getFile().getAbsolutePath());
+                String configLocation = "classpath:/application.yaml," + resource.getFile().getAbsolutePath();
+                log.info("Override config location :: {}", configLocation);
+                System.setProperty("spring.config.location", configLocation);
             }
         } catch (Exception e) {
-            log.error("Exception occur while getting secret.yaml file");
+            log.warn("Exception occur while getting secret.yaml maybe running in jar");
         }
     }
 }

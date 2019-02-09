@@ -1,4 +1,4 @@
-package server.message.slack;
+package server.alert.slack;
 
 import lombok.extern.slf4j.Slf4j;
 import me.ramswaroop.jbot.core.slack.models.RichMessage;

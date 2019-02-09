@@ -4,20 +4,20 @@ check alive about [java process, normal process, docker container]
 
 > ## Heartbeat agent  
 
-- check process or docker container by runnging java daemon
-- check process by using by using javaagent send heratbeat request  
+- check process(include docker container) by runnging java daemon  
+- check process by using javaagent & send heratbeat to server
 (will added process monitor)  
 
 > ## Heartbeat server  
 
-- monitoring heartbeat > alert state changed
+- monitoring heartbeat > alert state changed messages  
 - support command in slack bot  
 
 <br /><br />
 
 ---  
 
-> ## Example  
+> ## Demo  
 
 ![slack_webhooks](./pics/slack_webhooks.png)  
 
@@ -57,12 +57,9 @@ $ mvn clean install
     }
   ]
 }
-```
+```  
 
-> #### Start heartbeat agent in javaagent
-
-- **reference from elastic/apm-agent-java**  
-(https://www.elastic.co/guide/en/apm/agent/java/current/application-server-setup.html)
+> #### 2.1 Start javaagent  
 
 - **Normal use**  
 
@@ -84,7 +81,7 @@ set CATALINA_OPTS=%CATALINA_OPTS% -javaagent:/path/to/heartbeat-agent-<version>.
 set CATALINA_OPTS=%CATALINA_OPTS% -Dheartbeat.config.location=/path/config.json
 ```  
 
-> #### Start heartbeat agent with daemon  
+> #### 2.2 Start java app  
 
 ```
 $ java -Dheartbeat.config.location=/path/config.json -jar heartbeat-agent-0.0.1.jar  
@@ -94,7 +91,7 @@ or
 $ use start.sh in resources/bin  
 ```  
 
-<br /><br />  
+<br />  
 
 ---  
 

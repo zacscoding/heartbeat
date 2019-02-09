@@ -23,7 +23,7 @@ if [ "$(id -u)" = "0" ]; then
 fi
 
 if [ -z $PID ]; then
-	nohup java -Xms512m -Xmx512m -Dheartbeat.config.location=$SCRIPTPATH/config.json -jar $SCRIPTPATH/$JAR --spring.config.location=$CONFIG_LOCATION  1> $SCRIPTPATH/heartbeat-server.log 2>&1 &
+	nohup java -Xms512m -Xmx512m -jar $SCRIPTPATH/$JAR --spring.config.location=$CONFIG_LOCATION  1> $SCRIPTPATH/heartbeat-server.log 2>&1 &
 	PID=$!
 	echo $PID > $SCRIPTPATH/server.pid
 	exit 0

@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 
 /**
  * Keep application
- * - start heatbeat client
+ * - start heartbeat client
  *
  * @GitHub : https://github.com/zacscoding
  */
@@ -72,7 +72,7 @@ public class Bootstrap {
             switch (service.getType()) {
                 case AGENT:
                 case UNKNOWN:
-                    throw new UnsupportedOperationException("Not supported type : " + service.getType());
+                    throw new UnsupportedOperationException("Not supported type : " + service.getType() + "in daemon");
                 case PROCESS:
                     heartbeat = new ProcessHeartbeat(
                         service.getServiceName(), service.getProcessIdFile(), service.getProcessNames()

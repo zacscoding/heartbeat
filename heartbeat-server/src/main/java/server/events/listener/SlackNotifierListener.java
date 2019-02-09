@@ -8,11 +8,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
+import server.alert.slack.SlackMessageConverter;
+import server.alert.slack.SlackWebHooks;
 import server.configuration.SlackConfiguration;
 import server.events.HostStateChangedEvent;
 import server.events.publisher.HostStatePublisher;
-import server.message.slack.SlackMessageConverter;
-import server.message.slack.SlackWebHooks;
 import server.state.HostEntity;
 import server.state.HostState;
 
@@ -29,16 +29,11 @@ import server.state.HostState;
 public class SlackNotifierListener {
 
     private SlackWebHooks slackWebHooks;
-    private SlackMessageConverter messageConverter;
-
 
     @Autowired
-    public SlackNotifierListener(HostStatePublisher hostStatePublisher, SlackWebHooks slackWebHooks,
-        SlackMessageConverter messageConverter) {
+    public SlackNotifierListener(HostStatePublisher hostStatePublisher, SlackWebHooks slackWebHooks) {
 
         this.slackWebHooks = slackWebHooks;
-        this.messageConverter = messageConverter;
-
         hostStatePublisher.register(this);
     }
 
@@ -79,7 +74,7 @@ public class SlackNotifierListener {
             .append("    Service `").append(hostEntity.getServiceName()).append("`");
 
         slackWebHooks.invokeSlackWebHooks(
-            messageConverter.convertHostStateChangedMessage(builder.toString())
+            SlackMessageConverter.INSTANCE.convertHostStateChangedMessage(builder.toString())
         );
     }
 }
