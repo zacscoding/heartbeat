@@ -14,24 +14,52 @@ import org.springframework.core.io.ClassPathResource;
 @SpringBootApplication
 public class HeartbeatServerApplication {
 
+
     public static void main(String[] args) {
-        beforeApplication();
+        args = new String[]{"--spring.config.location=classpath:/applicatin.yaml"};
+        args = replaceConfigLocation(args);
         SpringApplication.run(HeartbeatServerApplication.class, args);
     }
 
     /**
-     * Override application.yaml to secret.yaml in IDE
+     * Override secret.yaml in IDE
      */
-    private static void beforeApplication() {
+    private static String[] replaceConfigLocation(String[] originArgs) {
+        String configLocation = null;
+
         try {
             ClassPathResource resource = new ClassPathResource("secret.yaml");
             if (resource.exists()) {
-                String configLocation = "classpath:/application.yaml," + resource.getFile().getAbsolutePath();
-                log.info("Override config location :: {}", configLocation);
-                System.setProperty("spring.config.location", configLocation);
+                configLocation = "classpath:/application.yaml,classpath:/secret.yaml";
             }
         } catch (Exception e) {
             log.warn("Exception occur while getting secret.yaml maybe running in jar");
+            configLocation = null;
         }
+
+        if (configLocation == null) {
+            return originArgs;
+        }
+
+        String configLocationArg = "--spring.config.location=" + configLocation;
+
+        if (originArgs == null || originArgs.length == 0) {
+            return new String[]{
+                configLocationArg
+            };
+        }
+
+        String[] result = new String[originArgs.length + 1];
+        for (int i = 0; i < originArgs.length; i++) {
+            if (originArgs[i].startsWith("--spring.config.location=")) {
+                originArgs[i] = configLocationArg;
+                return originArgs;
+            }
+            result[i] = originArgs[i];
+        }
+
+        result[originArgs.length] = configLocation;
+
+        return result;
     }
 }

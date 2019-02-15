@@ -14,10 +14,7 @@ public abstract class MessageConverter {
 
     /**
      * Convert host entities to below text
-     *
-     * | ServiceName                    | State   | Pid        | Ip              | Last heartbeat       |
-     * [No1]. Berith-Api[DEV] / ON / 4234 / 127.0.0.1       | 19-02-09 05:19:05    |
-     * | Berith-Wallet[DEV]             | OFF     | 24816      | 192.168.5.78    | 19-02-09 05:19:05    |
+     * - [No1]ServiceName0001 : Status[ Up ] / Pid [ 4234 ] / Ip [192.168.79.12 ] / Last beat [ 19-02-11 09:08:07 ]
      */
     public String convertServersState(List<HostEntity> entities) {
         if (entities == null) {
@@ -25,7 +22,7 @@ public abstract class MessageConverter {
         }
 
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yy-MM-dd HH:mm:ss");
-        final String leftAlignFormat = "- %s / %s / Working(%s) / Pid(%s) / Ip(%s) / Last beat(%s)\n";
+        final String leftAlignFormat = "- %s*%s* : Status[ `%s` ] / Pid [ %s ] / Ip [ %s ] / Last beat [ %s ]\n";
         StringBuilder message = new StringBuilder(400 + 100 * entities.size());
 
         /*message.append(
@@ -35,7 +32,7 @@ public abstract class MessageConverter {
         ).append(
             "+--------------------------------+---------+------------+-----------------+----------------------+\n"
         );*/
-        //message.append(String.format(leftAlignFormat, "No", "ServiceName", "State", "Pid", "Ip", "Last Heartbeat"));
+        message.append("*Result of server status*\n");
         for (int i = 0; i < entities.size(); i++) {
             HostEntity entity = entities.get(i);
             String number = "[No" + (i + 1) + "]. ";
@@ -56,9 +53,9 @@ public abstract class MessageConverter {
 
         switch (state) {
             case HEALTHY:
-                return "ON";
+                return "Up";
             case HEARTBEAT_LOST:
-                return "OFF";
+                return "Down";
             case UNKNOWN:
             default:
                 return "Unknown";

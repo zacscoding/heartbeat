@@ -1,6 +1,6 @@
 ## Servers
 server:
-  port: 8080
+  port: 18989
 
 ## Spring
 spring:
@@ -21,7 +21,7 @@ spring:
 ## heartbeat
 heartbeat:
   server:
-    threadWakeUpInterval: 60000
+    threadWakeUpInterval: 600000
 
 ## Slack apis
 slack:

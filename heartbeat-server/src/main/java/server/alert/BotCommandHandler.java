@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Random;
 import lombok.extern.slf4j.Slf4j;
 import server.state.HostEntity;
+import server.state.HostState;
 import server.state.repository.HostEntityRepository;
 
 /**
@@ -16,9 +18,9 @@ import server.state.repository.HostEntityRepository;
 public class BotCommandHandler {
 
     private HostEntityRepository hostEntityRepository;
-    private BotCommandReply replier;
+    private BotCommandReplier replier;
 
-    public BotCommandHandler(HostEntityRepository hostEntityRepository, BotCommandReply replier) {
+    public BotCommandHandler(HostEntityRepository hostEntityRepository, BotCommandReplier replier) {
         Objects.requireNonNull(hostEntityRepository, "hostEntityRepository must be not null");
         Objects.requireNonNull(replier, "replier must be not null");
 
@@ -60,6 +62,12 @@ public class BotCommandHandler {
     private void handleServersCommand(Map<String, Object> context) {
         try {
             List<HostEntity> entities = hostEntityRepository.findAll();
+            /*if (entities.isEmpty()) {
+                entities.add(createDummyEntity("ElasticsearchService01", true));
+                entities.add(createDummyEntity("KafkaBrokers01", false));
+                entities.add(createDummyEntity("Zookeeper01", false));
+            }*/
+
             replier.replyServersStateMessage(context, entities);
         } catch (Throwable e) {
             log.warn("Exception occur while handle servers command", e);
@@ -117,5 +125,25 @@ public class BotCommandHandler {
      */
     private void handleHelpCommand(Map<String, Object> context) {
         replier.replyHelpMessage(context);
+    }
+
+    /**
+     * Create dummy HostEntity for dev
+     */
+    private HostEntity createDummyEntity(String serviceName, boolean working) {
+        HostEntity entity = new HostEntity();
+
+        entity.setServiceName(serviceName);
+        if (working) {
+            entity.setHostState(HostState.HEALTHY);
+        } else {
+            entity.setHostState(HostState.HEARTBEAT_LOST);
+        }
+
+        entity.setPid(2223);
+        entity.setLastAgentTimestamp(System.currentTimeMillis());
+        entity.setIp("192.168.79." + new Random().nextInt(254) + 2);
+
+        return entity;
     }
 }

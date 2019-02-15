@@ -1,5 +1,6 @@
 package server.agent;
 
+import com.sun.media.jfxmedia.logging.Logger;
 import java.util.List;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
@@ -82,6 +83,7 @@ public class HeartbeatMonitor implements Runnable {
 
             // lost heartbeat
             if (isLostHeartbeat(host.getLastAgentTimestamp(), now)) {
+                log.info("Lost heartbeat : {}", host.getServiceName());
                 // update heartbeat log to database
                 log.info("Heartbeat lost : {}", host.getServiceName());
                 HostState prevState = host.getHostState();
@@ -98,6 +100,8 @@ public class HeartbeatMonitor implements Runnable {
                     .build();
 
                 hostStatePublisher.publish(event);
+            } else {
+                log.info("Alive host : {}", host.getServiceName());
             }
         }
     }

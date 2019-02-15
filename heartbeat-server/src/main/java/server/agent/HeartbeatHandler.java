@@ -4,6 +4,7 @@ import java.util.Optional;
 import javax.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import server.events.HostStateChangedEvent;
 import server.events.publisher.HostStatePublisher;
@@ -25,21 +26,13 @@ public class HeartbeatHandler {
     private HostStatePublisher hostStatePublisher;
 
     @Autowired
-    public HeartbeatHandler(HostEntityRepository hostEntityRepository, HostStatePublisher hostStatePublisher) {
+    public HeartbeatHandler(HostEntityRepository hostEntityRepository, HostStatePublisher hostStatePublisher
+        ) {
+
         this.hostEntityRepository = hostEntityRepository;
         this.hostStatePublisher = hostStatePublisher;
-        /*this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository,
-            hostStatePublisher, TimeUnit.MILLISECONDS.convert(1L, TimeUnit.MINUTES));*/
-
-        Long threadWakeUpInterval = null;
-        try {
-            threadWakeUpInterval = Long.parseLong(System.getenv("heartbeat.server.threadWakeUpInterval"));
-        } catch (Exception e) {
-            threadWakeUpInterval = Long.valueOf(60000L);
-        }
-
-        this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository,
-            hostStatePublisher, threadWakeUpInterval);
+        //this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository, hostStatePublisher, threadWakeUpInterval);
+        this.heartbeatMonitor = new HeartbeatMonitor(hostEntityRepository, hostStatePublisher, 10000L);
     }
 
     @PostConstruct

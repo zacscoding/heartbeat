@@ -7,7 +7,7 @@ import server.state.HostEntity;
 /**
  * @GitHub : https://github.com/zacscoding
  */
-public interface BotCommandReply {
+public interface BotCommandReplier {
 
     String helpMessage = "Command usages\n"
         + "!server [server name] : display server info\n"

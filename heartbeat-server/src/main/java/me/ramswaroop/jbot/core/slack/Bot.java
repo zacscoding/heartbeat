@@ -32,7 +32,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
 /**
- * TODO :: will upgrade jbot version
+ * Paste source code from 4.1.2-rc.2
+ * TODO :: upgrade version after release because of disconnect websocket session.
  */
 
 /**

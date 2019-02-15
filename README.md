@@ -1,16 +1,16 @@
 # Heartbeat agent with server  
 
-check alive about [java process, normal process, docker container]  
+Check alive about [java process, normal process, docker container]  
 
 > ## Heartbeat agent  
 
-- check process(include docker container) by runnging java daemon  
+- check process(include docker container) by running java daemon  
 - check process by using javaagent & send heratbeat to server
 (will added process monitor)  
 
 > ## Heartbeat server  
 
-- monitoring heartbeat > alert state changed messages  
+- monitoring server status > alert some event messages if status is changed  
 - support command in slack bot  
 
 <br /><br />
@@ -19,11 +19,10 @@ check alive about [java process, normal process, docker container]
 
 > ## Demo  
 
-![slack_webhooks](./pics/slack_webhooks.png)  
+![slack_demo](./pics/slack_demo.png)  
 
-![slack_bot](./pics/slack_bot.png)  
-
-<br /><br />
+- alert server status changed event (WebHooks)  
+- reply server command (Bot)  
 
 ---  
 
@@ -100,7 +99,8 @@ $ use start.sh in resources/bin
 - **Running with jar**  
 
 ```
-$ java -jar target/heartbeat-server-<version>.jar  --spring.config.location=/path/application.yaml
+// Override configs default is below settings
+$ java -jar target/heartbeat-server-<version>.jar  --spring.config.location=classpath:/application.yaml,/path/application.yaml
 ```  
 
 - **Server configs**  

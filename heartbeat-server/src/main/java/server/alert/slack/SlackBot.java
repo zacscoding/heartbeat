@@ -1,10 +1,8 @@
 package server.alert.slack;
 
 import com.google.common.collect.ImmutableMap;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import lombok.extern.slf4j.Slf4j;
 import me.ramswaroop.jbot.core.common.Controller;
@@ -17,7 +15,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 import server.alert.BotCommandHandler;
-import server.alert.BotCommandReply;
+import server.alert.BotCommandReplier;
 import server.configuration.SlackConfiguration;
 import server.configuration.properties.SlackProperties;
 import server.state.HostEntity;
@@ -36,7 +34,7 @@ import server.state.repository.HostEntityRepository;
 @JBot
 @Component
 @ConditionalOnBean(SlackConfiguration.class)
-public class SlackBot extends Bot implements BotCommandReply {
+public class SlackBot extends Bot implements BotCommandReplier {
 
     // autowired
     private SlackProperties slackProperties;
@@ -61,7 +59,7 @@ public class SlackBot extends Bot implements BotCommandReply {
 
     @Controller(events = EventType.MESSAGE, pattern = "^![a-zA-Z0-9].*?")
     public void onReceiveMessage(WebSocketSession session, Event event, Matcher matcher) {
-        String commandValue = event.getText();
+        String commandValue = event.getText().toLowerCase();
         log.info("Receive slack bot command : {}", commandValue);
 
         handler.handleCommand(
